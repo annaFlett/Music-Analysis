@@ -11,18 +11,18 @@ load_dotenv()
 # # The API endpoint
 # url = "https://accounts.spotify.com/authorize?"
 
-# ## investigate this link
+# # ## investigate this link
 # params = {
 #     "client_id": os.getenv("CLIENT_ID"),
 #     "response_type" : 'code',
 #     "redirect_uri" : "http://127.0.0.1:8888/callback",
-#     "scope" : "user-library-read"
+#     "scope" : "user-read-recently-played user-read-playback-state user-read-currently-playing user-top-read user-read-email user-read-private"
 # }
 
 # # A GET request to the API
 # response = requests.get(url,params=params)
 # #headers={f"Authorization":f"Bearer  {os.getenv("ACCESS_TOKEN")}"}
-# # Print the response
+# # # Print the response
 # # print(response.json())
 # print("here")
 # print(response)
@@ -34,7 +34,7 @@ load_dotenv()
 
 # data = {
 # 'grant_type' : "authorization_code",
-# 'code' : 'AQCZvz_o1gqrKOIzMRw3xQ6xZ_1kgyASRcBrSRnM_DHYjk8xlzuSNlIoLe9tvr4TzUxO6WZSl2UUCuqOZwGn4Yi_04ENjkDjRJPy3R5OhgRyw6U933x_vtJHHmopdyszj1sMrULTirr3rdG7IKLA3pgvoyqja0NwC0Iw34s5CItbOZH0piwHj3DU7ILMZhaBsa_kv5o',
+# 'code' : 'os.getenv("AUTH_CODE")',
 # 'redirect_uri' : "http://127.0.0.1:8888/callback"}
 # headers = { 'Authorization' : f'Basic {base64.b64encode(f"{os.getenv("CLIENT_ID")}:{os.getenv("CLIENT_SECRET")}".encode()).decode()}',
 #            'Content-Type' : 'application/x-www-form-urlencoded'}
@@ -56,4 +56,5 @@ data = {
 url = "https://accounts.spotify.com/api/token"
 response = requests.post(url,headers=headers,data=data)
 print(response.text)
+os.environ['ACCESS_TOKEN'] = response.json()['access_token']
 ###############################################################################################################
