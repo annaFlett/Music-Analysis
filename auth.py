@@ -1,9 +1,10 @@
 import base64
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
 import requests
+from pathlib import Path
 
-load_dotenv()
+load_dotenv(override=True)
 
 ## TO GET ACCESS IN THE FIRST PLACE
 ###############################################################################################################
@@ -56,5 +57,5 @@ data = {
 url = "https://accounts.spotify.com/api/token"
 response = requests.post(url,headers=headers,data=data)
 print(response.text)
-os.environ['ACCESS_TOKEN'] = response.json()['access_token']
+set_key(Path('.') / '.env', 'ACCESS_TOKEN', response.json()['access_token'])
 ###############################################################################################################
