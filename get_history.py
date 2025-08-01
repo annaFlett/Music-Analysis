@@ -5,15 +5,14 @@ from dotenv import load_dotenv,set_key
 from pathlib import Path
 from subprocess import Popen
 
-p  = Popen(['python','auth.py'])
-p.wait()
-
 load_dotenv()
 
+p  = Popen(['python',os.getenv('AUTH_PATH')])
+p.wait()
 
 endpoint = "https://api.spotify.com/v1/me/player/recently-played"
 headers={f"Authorization":f"Bearer  {os.getenv("ACCESS_TOKEN")}"}
-CSV_PATH = "csv/songhistory.csv"
+CSV_PATH = os.getenv("CSV_PATH_SONG_HISTORY")
 dfs_everything,dfs_context,dfs_played_at = [],[],[]
 
 params = {
@@ -23,10 +22,11 @@ params = {
 
 response = requests.get(url=endpoint,headers=headers,params=params)
 print(response.status_code)
+print(response.text)
 test = response.json()
     
 if test['cursors'] != None:
-    set_key(Path('.') / '.env', 'PREV_SEARCH', response.json()['cursors']['after'])
+    set_key(os.getenv("ENV_PATH"), 'PREV_SEARCH', response.json()['cursors']['after'])
 
 for x in response.json()['items']:
     dfs_everything.append(x['track'])
@@ -44,7 +44,7 @@ try:
     songs.drop(columns=['album','artists','external_ids'],inplace=True,axis=1)
     new_songs = pd.concat([songs,context,played_at],axis = 1)
 
-    history = pd.read_csv("csv/songhistory.csv",index_col=0)
+    history = pd.read_csv(CSV_PATH,index_col=0)
     total_history = pd.concat([new_songs,history],axis=0)
     total_history.to_csv(path_or_buf = CSV_PATH)
 

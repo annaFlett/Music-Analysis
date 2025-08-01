@@ -57,5 +57,5 @@ data = {
 url = "https://accounts.spotify.com/api/token"
 response = requests.post(url,headers=headers,data=data)
 print(response.text)
-set_key(Path('.') / '.env', 'ACCESS_TOKEN', response.json()['access_token'])
+set_key(os.getenv("ENV_PATH"), 'ACCESS_TOKEN', response.json()['access_token'])
 ###############################################################################################################
