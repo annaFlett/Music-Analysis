@@ -1,80 +1,55 @@
 import pandas as pd
 import requests
-import http
 import os
-from dotenv import load_dotenv
-import time
-import datetime
+from dotenv import load_dotenv,set_key
+from pathlib import Path
+from subprocess import Popen
+
+p  = Popen(['python','auth.py'])
+p.wait()
 
 load_dotenv()
 
 
 endpoint = "https://api.spotify.com/v1/me/player/recently-played"
 headers={f"Authorization":f"Bearer  {os.getenv("ACCESS_TOKEN")}"}
-CSV_PATH = "songhistory.csv"
-
-dfs_albums = []
-dfs_artists = []
-dfs_everything = []
-dfs_played_at = []
-dfs_context = []
-ALBUM_COLS = ['a_album_type','a_artists','a_available_markets','a_external_urls','a_href','a_id','a_images','a_name','a_release_date','a_release_date_precision','a_total_tracks','a_type','a_uri']
-ARTIST_COLS = ['art_external_urls','art_href','art_id','art_name','art_type','art_uri']
-
-
-
-
-stamp = 1735678800 ## 22:00, 31st December 2024
-stamp = time.time() ## 6:00 29th July 2025
+CSV_PATH = "csv/songhistory.csv"
+dfs_everything,dfs_context,dfs_played_at = [],[],[]
 
 params = {
-        'after' : int(stamp),
-        'limit' : 50
+        'after' : str(os.getenv("PREV_SEARCH")),
+        'limit' : 50,
     }
 
-i = 0
-while i < 5:
-    print(stamp)
-    print(i)
+response = requests.get(url=endpoint,headers=headers,params=params)
+print(response.status_code)
+test = response.json()
+    
+if test['cursors'] != None:
+    set_key(Path('.') / '.env', 'PREV_SEARCH', response.json()['cursors']['after'])
 
-    response = requests.get(url=endpoint,headers=headers,params=params)
-    print(response.status_code)
-    test = response.json()
-    if test['items'] == []:
-        break
-        
-    print(stamp)
-    print(test['cursors'])
-    print(test['next'])
-    stamp = test['cursors']['before']
-    params = {
-        'before' : int(stamp),
-        'limit' : 50
-    }
-    print(stamp)
-
-    for x in response.json()['items']:
-        dfs_albums.append(x['track']['album'])
-        dfs_artists.append(x['track']['artists'])
-        dfs_everything.append(x['track'])
-        dfs_played_at.append(x['played_at'])
-        dfs_context.append(x['context'])
-    print (datetime.datetime.fromtimestamp(int(int(stamp)/1000)))
-    i += 1
+for x in response.json()['items']:
+    dfs_everything.append(x['track'])
+    dfs_played_at.append(x['played_at'])
+    dfs_context.append(x['context'])
 
 try:
-    dfs_artists = list(map(lambda x : x[0],dfs_artists))
-    dfs = [pd.DataFrame(df) for df in [dfs_albums,dfs_artists,dfs_everything,dfs_context,dfs_played_at]]
-    dfs_for_concat =[pd.DataFrame(df) for df in dfs]
-    df_concatted = pd.concat(dfs_for_concat,axis=1)
-    df_concatted.columns = ALBUM_COLS  + ARTIST_COLS + list(df_concatted.columns[len(ALBUM_COLS)+len(ARTIST_COLS):-2]) + ['context','played_at']
-    df_concatted.to_csv(path_or_buf=CSV_PATH)
+    songs,context,played_at = [pd.DataFrame(df) for df in [dfs_everything,dfs_context,dfs_played_at]]
+    context.rename(columns={0:'context'},inplace=True)
+    played_at.rename(columns={0:'played_at'},inplace=True)
+    songs['album_id']= songs['album'].apply(lambda x : x['id'])
+    songs['external_urls'] = songs['external_urls'].apply(lambda x : x['spotify'])
+    songs['isrc'] = songs['external_ids'].apply(lambda x : x['isrc'])
 
-    songs = pd.read_csv(CSV_PATH,index_col=0)
-    songs.drop(labels=['album'],inplace=True,axis=1)
-    songs.to_csv(path_or_buf=CSV_PATH)
-except ValueError:
+    songs.drop(columns=['album','artists','external_ids'],inplace=True,axis=1)
+    new_songs = pd.concat([songs,context,played_at],axis = 1)
+
+    history = pd.read_csv("csv/songhistory.csv",index_col=0)
+    total_history = pd.concat([new_songs,history],axis=0)
+    total_history.to_csv(path_or_buf = CSV_PATH)
+
+except (ValueError,KeyError):
     print("No songs found")
 
 
-print(f"CURRENT TIME : {time.time()}")
+
