@@ -14,8 +14,8 @@ load_dotenv(override=True)
 
 endpoint = "https://api.spotify.com/v1/me/player/recently-played"
 headers={f"Authorization":f"Bearer  {os.getenv("ACCESS_TOKEN")}"}
-CSV_PATH = os.getenv("CSV_PATH_SONG_HISTORY")
-CONTEXT_PATH = os.getenv("CONTEXT_CSV_PATH")
+CSV_PATH = os.getenv("SONGHISTORY_CSV")
+CONTEXT_PATH = os.getenv("CONTEXT_CSV")
 dfs_everything,dfs_context,dfs_played_at = [],[],[]
 
 params = {

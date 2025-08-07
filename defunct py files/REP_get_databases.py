@@ -17,9 +17,11 @@ def extract_ids(rows,arr):
 
 ENDPOINT = "https://api.spotify.com/v1/me/tracks"
 HEADERS={f"Authorization":f"Bearer  {os.getenv("ACCESS_TOKEN")}"}
-ALBUMS_PATH = "csv/albums.csv"
-ARTISTS_PATH = "csv/artists.csv"
-SONGS_PATH = "csv/songs.csv"
+ALBUMS_PATH = os.getenv("ALBUMS_CSV")
+ARTISTS_PATH = os.getenv("ARTISTS_CSV")
+SONGS_PATH = os.getenv("SONGS_CSV")
+ARTISTS_ALBUMS_PATH = os.getenv("ARTIST_ALBUMS_CSV")
+ARTISTS_SONGS_PATH = os.getenv("ARTISTS_SONGS_CSV")
 
 collection , art_song_pairs , alb_art_pairs = [] , [] , []
 
@@ -32,16 +34,16 @@ for offset in range(0,5):
 
 
 ## Get Albums database
-dfs_albums = [x['album'] for x in collection]
-albums = pd.DataFrame(df for df in dfs_albums)
-albums[['artists','id']].apply(lambda x : extract_ids(x,alb_art_pairs),axis=1) # for albums-artists
-albums['external_urls'] = albums['external_urls'].apply(lambda x : x['spotify'])
-albums.drop(columns=['artists'],inplace=True,axis=1)
-albums.to_csv(path_or_buf = ALBUMS_PATH)
+# dfs_albums = [x['album'] for x in collection]
+# albums = pd.DataFrame(df for df in dfs_albums)
+# albums[['artists','id']].apply(lambda x : extract_ids(x,alb_art_pairs),axis=1) # for albums-artists
+# albums['external_urls'] = albums['external_urls'].apply(lambda x : x['spotify'])
+# albums.drop(columns=['artists'],inplace=True,axis=1)
+# albums.to_csv(path_or_buf = ALBUMS_PATH)
 
 ## Get albums-artists database
-art_albs = pd.DataFrame(alb_art_pairs,columns=["ArtistId","AlbumId"])
-art_albs.to_csv(path_or_buf = "artist_albums.csv")
+# art_albs = pd.DataFrame(alb_art_pairs,columns=["ArtistId","AlbumId"])
+# art_albs.to_csv(path_or_buf = ARTISTS_ALBUMS_PATH)
 
 ## Get artists database
 # artists =  []
@@ -63,7 +65,7 @@ art_albs.to_csv(path_or_buf = "artist_albums.csv")
 # songs.to_csv(path_or_buf = SONGS_PATH)
 
 # artists_songs = pd.DataFrame(art_song_pairs,columns=["ArtistId","SongId"])
-# artists_songs.to_csv(path_or_buf = "artist_songs_pairs.csv")
+# artists_songs.to_csv(path_or_buf = ARTISTS_SONGS_PATH)
 
 ################################################################################################################
 
