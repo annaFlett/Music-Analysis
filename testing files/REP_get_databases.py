@@ -25,13 +25,13 @@ ARTISTS_SONGS_PATH = os.getenv("ARTISTS_SONGS_CSV")
 
 collection , art_song_pairs , alb_art_pairs = [] , [] , []
 
-for offset in range(0,5):
-    params = {'limit' : 49, 'offset' : offset*50}
+for offset in range(2,3):
+    params = {'limit' : 49, 'offset' : offset*50-10}
     response = requests.get(ENDPOINT,headers=HEADERS,params=params)
     print(response.status_code)
     for x in response.json()['items']:
         collection.append(x['track'])
-
+print(collection)
 
 ## Get Albums database
 # dfs_albums = [x['album'] for x in collection]
