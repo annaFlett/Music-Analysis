@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <div id="song_data" data-songs="{{ rec_song_ids }}"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Results</title>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+  </head>
+  <body onload="right_pressed()">
+    <div id="Recommendations">
+      <div id="player-box">
+      <div id="top-text">
+        <h2 id="song-choice"> Based on your choices, here are some songs you might like : </h2>
+      </div>
+      <div id="content-box" class="flex-container">
+        <div id="left-button-container">
+          <button id="left-button" class='player-button' disabled="true" onclick="left_pressed()"><i class="arrow left"></i></button>
+        </div>
+        <div id="embedding-container">
+          <iframe id="player" data-testid="embed-iframe" style="border-radius:12px" src="" width="100%" height="352" frameBorder="0" 
+          allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
+        </iframe>
+        </div>
+          <div id="right-button-container">
+          <button class="player-button" id="right-button" disabled="false" onclick="right_pressed()"><i class="arrow right"></i></button>
+        </div>
+      </div>
+    </div>
+    </div>
+    <script>
+        var list_pos = -1;
+        var song_data_store = document.getElementById('song_data');
+        var song_data_arr = song_data_store.dataset.songs.replace(/\[|\]/g,'').split(',')
+
+        function update_embed (ev) {
+            var played = document.getElementById("player")
+            console.log(song_data_arr[list_pos])
+            var new_id = song_data_arr[list_pos].split("'")[1]
+            played.setAttribute('src',`https://open.spotify.com/embed/track/${new_id}?utm_source=generator`)
+        }
+
+        function right_pressed (ev) {
+            if (list_pos == 19) {
+              document.getElementById("right-button").disabled = true;
+            }
+            else {
+              document.getElementById("right-button").disabled = false;
+              list_pos += 1
+              document.getElementById("left-button").disabled = false;
+            }
+            update_embed(ev)
+        }
+
+        function left_pressed (ev) {
+            if (list_pos == 0) {
+              document.getElementById("left-button").disabled = true;
+            }
+            else {
+              document.getElementById("left-button").disabled = false;
+              list_pos -= 1
+              document.getElementById("right-button").disabled = false;
+            }
+            update_embed(ev)
+        }
+
+    </script>
+  </body>
+</html>
