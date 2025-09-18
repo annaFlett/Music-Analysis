@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <div id="song_data" data-facts="{{ facts }}" data-tables=" {{tables}}" data-ids="{{song_ids}}" data-names="{{song_names}}"></div>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Your Account Analytics</title>
+    <style>html{visibility: hidden;opacity:0;}</style>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/mainpage.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+  </head>
+  <body>
+    <div id="loader" class="center"></div>
+    <div id="main-container">
+        <div id="title area">
+            <h1 id="main-title">Your Account Analytics</h1>
+        </div>
+        <div id="analytics-container">
+            <div id="left-column" class="main-column flex-1">
+                <div id="widgit-1-container" class="widgit-container">
+                    <div id="widgit-1-text-container" class="widgit-text-container">
+                        <h1 id="widgit-1-text" class="widgit-title">Your Listening Hours</h1>
+                        <hr>
+                    </div>
+                    <div id="widgit-1">
+                        {{hourly_fig|safe}}
+                    </div>
+                </div>
+                <div id="widgit-2-container" class="widgit-container">
+                    <div id="widgit-2-text-container" class="widgit-text-container">
+                        <h1 id="widgit-2-text" class="widgit-title">Your Weekly Trends</h1>
+                        <hr>
+                    </div>
+                    <div id="widgit-2">
+                        {{weekly_fig|safe}}
+                    </div>
+                </div>
+                <div id="widgit-5" class="widgit-container">
+                    <div id="world map">
+                        {{world_map|safe}}
+                    </div>
+                </div>
+
+            </div>
+            <div id="center-column" class="main-column flex-1">
+                <div id="widgit-4-container" class="widgit-container">
+                <div id="widgit-4-text-container" class="widgit-text-container">
+                    <h1 id="widgit-4-text" class="widgit-title">Quick Stats</h1>
+                    <hr>
+                </div>
+                <div id="numeric-stats">
+                    <div id="left-button-stats" class="flex-1 left-button-container">
+                        <button class="button"><i class="arrow left"></i></button>
+                    </div>
+                    <div id="stat-description" class="flex-3">
+                        <h1 id="stat-description-text"></h1>
+                    </div>
+                    <div id="stat-value" class="flex-3">
+                        <h1 id="stat-value-text"></h1>
+                    </div>
+                    <div id="right-button-stats" class="flex-1 right-button-container">
+                        <button class="button"><i class="arrow right"></i></button>
+                    </div>
+                </div>
+                <div id="top-5s">
+                    <div id="top-5s-text">
+                        <h2>See your top 5 most popular in a given category:</h2>
+                    </div>
+                    <div id="top-5s-dropdown">
+                        <select name="dropdown-ans" id="dropdown-menu">
+                            <option vale="0" disabled selected value> Pick a category</option>
+                            <option value="0">Artists</option>
+                            <option value="1">Song listens (past 30 days)</option>
+                            <option value="2">Song listens (all time)</option>
+                            <!-- <option value="audi">Audi</option> turn this into albums-->
+                        </select>
+                    </div>
+                    <div id="table-holder" class="flex-3">
+                        {{tables|safe}}
+                    </div>
+                </div>
+            </div>
+                <div id="widgit-3" class="widgit-container">
+                    <iframe id="dash-app" src="http://localhost:8050" style="width:100%; height:450px" ></iframe>
+                </div>
+
+            </div>
+
+            <div id="right-column" class="main-column flex-1">
+                <div id="widgit-6" class="widgit-container">
+                    <div id="user-select">
+                        <div id="song-select">
+                            <h1 id="widgit-6-text" class="widgit-title">Pick a song to add</h1>
+                            <hr>
+                            <div id="song-dropdown">                     
+                                <form>
+                                    <select name="song-select" id="song-selection-dropdown">
+                                        <option value="-1" disabled selected value>Pick a song to add</option>
+                                    </select>
+                                    <button id="add-song-button" type='button' onclick="addSong()">Add song</button> 
+                                </form>
+                            </div>
+                        </div>
+                        <div id="songs-selected">
+                            <h1>Current songs selected: </h1>
+                            <h2 id="empty-song-msg">None! You can pick up to 5</h2>
+                            <div id="song-area">
+
+                            </div>
+                        </div>
+                        <div id="slider-container">
+                            <h2 id="slider-instruction-1"></h2>
+                            <h2 id="slider-instruction-2"></h2>
+                            <div id="weight-slider">
+                                    <div id="multiSlider"></div>
+                            </div>
+                        </div>
+                        <div id="feature-tweaking">
+                            <button id="song-submit-button">Song Submit</button>
+                            <input type="number" name="points" step="0.1" max="1" min="0">
+                        </div>
+                    </div>
+                    <div id="error-container"></div>
+                    <div id="player-box">
+                        <div id="top-text">
+                            <h2 id="song-choice"> Based on your choices, here are some songs you might like : </h2>
+                        </div>
+                        <div id="content-box" class="flex-container">
+                            <div class="left-button-container">
+                                <button id="left-player-button" class='button' disabled="true"><i class="arrow left"></i></button>
+                            </div>
+                                <div id="embedding-container">
+                                    <iframe id="player" data-testid="embed-iframe" style="border-radius:12px" src="" width="100%" height="352" frameBorder="0" 
+                                    allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
+                                    </iframe>
+                                </div>
+                            <div class="right-button-container">
+                                <button class="button" id="right-player-button"><i class="arrow right"></i></button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var song_data_store = document.getElementById('song_data');
+
+        let currentIdx = 0;
+        let songData;
+        let percs;
+
+        const leftPlayerButton = document.getElementById("left-player-button")
+        const rightPlayerButton = document.getElementById("right-player-button")
+        const playerBox = document.getElementById("player-box")
+        const songSubmitBtn = document.getElementById("song-submit-button")
+        const player = document.getElementById("player")
+
+        function updateEmbed () {
+            player.setAttribute('src',`https://open.spotify.com/embed/track/${songData[currentIdx]}?utm_source=generator`)
+        }
+
+        function updateButtons () {
+            leftPlayerButton.disabled = currentIdx <= 0
+            rightPlayerButton.disabled = currentIdx >= songData.length - 1
+        }
+
+        leftPlayerButton.addEventListener('click',() => {
+            currentIdx -= 1
+            updateButtons()
+            updateEmbed()
+
+        })
+
+        rightPlayerButton.addEventListener('click',()=> {
+            currentIdx += 1
+            updateButtons()
+            updateEmbed() 
+        })
+
+
+    songSubmitBtn.addEventListener('click', async () => {
+    playerBox.style.visibility = "hidden"
+    playerBox.style.display = "none"
+
+    let errorMsg = document.getElementById("no-songs-error")
+    if (errorMsg) {
+        errorMsg.remove()
+    }
+
+      if (songsAdded.length == 0) {
+        const errorMsg = document.createElement("h2")
+        errorMsg.textContent = "Please add at least 1 song"
+        errorMsg.setAttribute("id","no-songs-error")
+        document.getElementById("error-container").appendChild(errorMsg)
+      }
+      else {
+        playerBox.style.visibility = "visible"
+        playerBox.style.display = "flex"
+
+
+        // if (songsAdded.length == 1) {
+        //     percs = ['100']
+        // }
+        // else {
+        //     percs = slider.noUiSlider.get();
+        // }
+
+        const response = await fetch('/process', {
+                                    method: 'POST',
+                                    headers: {
+                                    'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ splits: percs, ids:songsAdded })
+                                })
+
+        const data = await response.json()
+        songData = data.result.map((s) => s.replace(/'/g,'').replace(/ /g,''));
+
+        currentIdx = 0
+        updateButtons()
+        updateEmbed()
+        }
+    });
+      
+
+
+    let factIdx = 0;
+    let factAnswers = song_data_store.dataset.facts.replace(/\[|\]/g,'').replace(/'/g, "").split(',')
+    const factText = ["Average liked song length ", "No. of songs listened to in the past week",
+     "No. of songs listened to in the past 30 days", "Average number of songs listened to per day"];
+
+    const leftFactButton = document.getElementById("left-button-stats")
+    const rightFactButton = document.getElementById("right-button-stats")
+    const statDescr = document.getElementById("stat-description-text")
+    const statValue = document.getElementById("stat-value-text")
+
+    function updateFact() {
+        statDescr.textContent = factText[factIdx];
+        statValue.textContent = factAnswers[factIdx];
+    }
+
+    rightFactButton.addEventListener('click',() => {
+        factIdx = (factIdx + 1) % 4;
+        updateFact()
+    })
+
+    leftFactButton.addEventListener('click',() => {
+        factIdx = (factIdx + 3) % 4;
+        updateFact()
+    })
+
+
+    window.addEventListener("load", () => {
+        document.querySelectorAll('.plotly-graph-div').forEach(div => {
+            Plotly.Plots.resize(div)
+        });
+
+        updateFact()
+        tables_setup()
+        fill_dropdown()
+
+        // add in fetch so i don't have to pass things through meta
+    
+        document.querySelector("#loader").style.display = "none";
+        document.querySelector("body").style.visibility = "visible";
+    });
+
+    var tables_arr = song_data_store.dataset.tables.replace(/\[|\]/g,'').split('###')
+    
+    function tables_setup(ev) {
+        document.getElementById("table-holder").innerHTML = tables_arr[0]
+    }
+
+    var dropdown = document.getElementById("dropdown-menu")
+    dropdown.addEventListener('change',() => {
+        var choice = parseInt(dropdown.value)
+        document.getElementById("table-holder").innerHTML = tables_arr[choice]
+    });
+
+
+    const slider = document.getElementById('multiSlider');
+    let handleCount = 0
+    const colours = ['red','green','blue','orange','pink']
+
+    function slider_create() {
+    const splits = []
+    const jumps = parseInt(100 / (handleCount))
+    for (var i = 1; i <= handleCount - 1; i++) {
+        splits.push(i*jumps);
+    }
+
+
+    noUiSlider.create(slider, {
+        start: splits, // 3 handles
+        connect: Array(handleCount).fill(true), // colors between handles
+        range: {min: 0, max: 100},
+        step:1,
+        margin:10
+    });
+
+    slider.noUiSlider.on('update', (values) => {
+        console.log(values);
+        const tags = document.getElementsByClassName("contribution-value")
+        const percs_calcs = [...values.map(Number)];
+
+        percs_calcs.unshift(0);
+        percs_calcs.push(100);
+
+        percs = percs_calcs.slice(1).map((value, index) => {
+            return value - percs_calcs[index];
+        });
+
+        Array.from(tags).forEach((tag, index) => {
+        tag.textContent = `(${percs[index]}%)`;
+        });
+
+    const segments = slider.querySelectorAll('.noUi-connect');
+    for (let i = 0; i < handleCount; i++) {
+        segments[i].style.background = colours[i]
+    }
+})}
+
+
+    function update_slider() {
+        if (slider.noUiSlider !== undefined) {
+            slider.noUiSlider.destroy();
+        }
+        console.log(handleCount)
+        if (handleCount > 1) {
+            slider_create();
+            document.getElementById("slider-instruction-1").textContent = "Control how much you want each song to contribute:"
+            document.getElementById("slider-instruction-2").textContent = "(By default they have equal contribution)"
+            const tags = document.getElementsByClassName("contribution-value")
+            const equal_perc = String(parseInt(100 / handleCount))
+            for (tag of tags) {
+                tag.textContent = "(" + equal_perc + "%)"
+            }
+        }
+        else {
+            document.getElementById("slider-instruction-1").textContent = ""
+            document.getElementById("slider-instruction-2").textContent = ""
+        }
+        if (handleCount > 0) {
+            document.getElementById("empty-song-msg").textContent = ""
+        }
+        else {
+            document.getElementById("empty-song-msg").textContent = "None! You can pick up to 5 songs"
+        }
+    }
+
+
+    // slider.noUiSlider.on('update', (values, handle) => {
+    // values = values.map(Number); // convert to numbers
+    // const lastHandle = values.length - 1;
+
+    // if (handle === lastHandle && values[lastHandle] > maxValue - limitForLastHandle) {
+    //     values[lastHandle] = maxValue - limitForLastHandle;
+    //     slider.noUiSlider.set(values);
+    // })
+
+    let songsAdded = Array();
+
+    var song_ids = song_data_store.dataset.ids.replace(/\[|\]/g,'').split(',')
+    var song_names = song_data_store.dataset.names.replace(/\[|\]/g,'').split(",")
+
+    var zipped_arrays = [[song_ids[0], song_names[0].substring(1,song_names[0].length-1).replace(/##/g,",")]].concat( song_ids.slice(1).map(function(e, i) {
+                                return [e, song_names[i+1].substring(2,song_names[i+1].length-1).replace(/##/g,",")];
+                            }));
+
+    
+    function fill_dropdown() {
+        for (pair of zipped_arrays) {
+                var opt = document.createElement('option');
+                opt.value = pair[0];
+                opt.textContent = pair[1];
+                songs_dropdown.appendChild(opt);
+        }
+
+    }
+    function delete_tag(id) {
+        console.log(id)
+        const div_to_kill = document.getElementById(id+"-div")
+        console.log(div_to_kill)
+        div_to_kill.remove()
+
+        const index = songsAdded.indexOf(id);
+        if (index > -1) { 
+            songsAdded.splice(index, 1); 
+        }
+
+        document.getElementById("add-song-button").disabled = false
+        handleCount -= 1
+        update_slider()
+
+    }
+
+const songs_dropdown = document.getElementById("song-selection-dropdown")
+
+    function addSong(ev) {
+        const song_id = songs_dropdown.value
+        const song_name = songs_dropdown.options[songs_dropdown.selectedIndex].text
+
+        if (!songsAdded.includes(song_id)) {
+            var area = document.getElementById("song-area")
+
+            const newNode = document.createElement("div")
+            newNode.setAttribute("class","song-tag")
+            newNode.id = song_id + "-div"
+
+            const text = document.createElement("h3")
+            text.textContent = song_name
+
+            const contrib = document.createElement("h3")
+            contrib.setAttribute("class", "contribution-value")
+
+            
+            console.log(newNode.id)
+            const delete_button = document.createElement("button")
+            delete_button.textContent = "X"
+            delete_button.id = song_id 
+            delete_button.onclick = () => delete_tag(delete_button.id)
+
+            newNode.appendChild(text)
+            newNode.appendChild(delete_button)
+            newNode.appendChild(contrib)
+            area.appendChild(newNode)
+
+            songsAdded.push(song_id)
+            handleCount += 1
+            update_slider()
+        }
+
+        if (handleCount > 4) {
+            document.getElementById("add-song-button").disabled = true
+        }
+    }
+
+    </script>
+    </body>
+</html>

@@ -1,0 +1,277 @@
+#main-title {
+    color:limegreen;
+    font-family:Monaco, sans-serif;
+    font-size: 80px;
+    font-weight: bold;
+    text-align:center;
+    margin-bottom:10px;
+}
+
+
+
+h1 {
+    color: white;
+}
+h2 {
+    color:white;
+}
+
+h3 {
+  color:white;
+}
+
+th {
+    color: white;
+    width : 70%;
+}
+
+td {
+    color:white;
+}
+
+
+table {
+  border-color: white;
+  width:100%
+}
+
+.widgit-container {
+  background-color: #696865;
+  margin:20px;
+  padding-top:0px;
+  padding-bottom:0px;
+}
+
+hr {
+  color: #f3f3f3;
+}
+
+#analytics-container {
+    display: flex;
+    width: auto;
+    min-height: 200px;
+    padding: 20px;
+}
+
+#analytics-container > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 200px;
+    padding: 20px;
+}
+
+#numeric-stats {
+    display: flex;
+    padding: 20px;
+    border-color: limegreen;
+    border-width: 5px;
+    border-style: solid;
+    min-height:160px;
+}
+
+.main-column > div {
+    padding-left : 20px;
+    padding-right : 20px;
+    padding-top : 5px;
+}
+
+.flex-1 {
+    flex : 1;
+}
+
+.flex-3 {
+    flex : 3;
+}
+
+#stat-description {
+    text-align: center;
+    align-items: center;
+    display : flex;
+    justify-content: center;
+}
+
+#stat-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#top-5s {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#table-holder {
+  width : 100%
+}
+
+#table-holder table td:nth-child(2),
+#table-holder table th:nth-child(2) {
+  text-align: center;
+}
+
+#top-5s-dropdown {
+  padding-bottom : 20px;
+}
+
+#quick-stats {
+  background-color: #696865;
+  padding-top : 0px;
+}
+
+#widgit-1-text {
+  margin : 4px;
+}
+
+#widgit-2-text {
+  margin : 4px;
+}
+
+.widgit-title {
+  margin : 4px;
+}
+
+/* Recommendations player */
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.button {
+    border-radius: 100%;
+    padding: 10px;
+}
+
+.flex-container {
+  display: flex; /* or inline-flex */
+  width : 100%;
+}
+
+#recommendations {
+  border-color: black;
+  border-width: 2px;
+  border-style: solid;
+  background-color: cyan;
+  display: inline-block;
+  padding: 0px 30px 30px ;
+
+}
+
+#content-box {
+  border-color: black;
+  background-color: deepskyblue;
+  border-width: 2px 2px 2px 2px;
+  border-style: solid;
+  padding: 20px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+#player-box {
+  padding:20px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  visibility: hidden;
+}
+
+.right-button-container {
+  flex: 1;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.left-button-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+#embedding-container {
+  flex: 6;
+  padding: 10px;
+}
+
+
+#Recommendations {
+  background-color: #696865;
+}
+#top-text {
+  text-align: center;
+}
+
+.song-tag {
+  display: flex;
+  align-items: center;
+}
+
+.song-tag > h3 {
+  padding-left : 20px;
+  padding-right : 20px;
+  margin : 5px;
+}
+
+.song-tag > button {
+  height: 50%;
+  color : red;
+}
+
+#songs-selected {
+  padding : 20px;
+  background-color: #696865 ;
+}
+
+/* ------------------------- */
+body {
+  visibility: hidden; /* hide by default */
+}
+
+#loader {
+    visibility: visible;
+    border: 12px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 12px solid #444444;
+    width: 70px;
+    height: 70px;
+    animation: spin 1s linear infinite;
+}
+
+.center {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+html {
+    background-color: black;
+    visibility: visible;
+    opacity: 1;
+}
+
