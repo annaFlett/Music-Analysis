@@ -18,7 +18,6 @@ DGREY = "#696865"
 
 MUSIC_FEATURES = ['acousticness','danceability','energy','instrumentalness','liveness','speechiness','valence']
 
-
 # --------------------------------------
 # Utilities
 # --------------------------------------
@@ -40,6 +39,76 @@ def fix(x):
         return "United Kingdom"
     return x
 
+def week_calc(x):
+    ## need to fix
+    if  x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=8,hour=23,minute=59,second=59):
+        return 1
+    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=15,hour=23,minute=59,second=59):
+        return 2
+    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=22,hour=23,minute=59,second=59):
+        return 3
+    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=29,hour=23,minute=59,second=59):
+        return 4
+    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=31,hour=23,minute=59,second=59) : 
+        return 5
+
+def colour_picker(df,text):
+    if text == "":
+        return "rgba(80, 89, 91, 0.89)"
+    else:
+        try: 
+            watches = int(df.loc[text])
+            if watches == 1:
+                return "rgba(49, 235, 65, 0.78)"
+            return "rgba(0, 144, 13, 1)"
+        except KeyError:
+            return "rgba(240,240,240,1)"
+        
+def initialise_graph_extras(fig,song_id,date,songs_df,art_song_df,artists_df):
+    week_days = ['Mo','Tu','We','Th','Fr','Sa','Su']
+    song_name = songs_df.loc[songs_df['id'] == song_id, 'name']
+    date = datetime.datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%f")
+    
+    if not song_name.empty:
+        artist_ids = art_song_df.loc[art_song_df['SongId'] == song_id, 'ArtistId']
+        artists_names = artists_df.loc[artists_df['id'].isin(artist_ids),'name'].drop_duplicates().to_list()
+        artists_str = ", ".join(artists_names)
+        total_str = f"Listening History :  {song_name.item()} by " + artists_str
+        if len(total_str) > 65:
+            total_str  = total_str[0:62] + "..."
+            
+        fig.add_shape(
+            type="rect",
+            x0=0, y0=18, x1=5, y1=19.5,
+            line=dict(width=0),
+            fillcolor="rgba(255, 255, 255, 0.59)",
+            label=dict(text=total_str, 
+                    textposition="middle left", font=dict(family="Souvenir Lt BT, bold", size=28))
+        )
+
+    
+    fig.add_shape(
+        type="rect",
+        x0=0, y0=15, x1=5, y1=16.5,
+        line=dict(width=0),
+        fillcolor="rgba(255, 255, 255, 0.59)",
+        label=dict(text=f"{date.strftime('%B').upper()} {date.strftime('%Y').upper()}", textposition="middle left", font=dict(family="Souvenir Lt BT, bold", size=28,color='red'))
+    )
+        
+    for k in range(0,7):
+        fig.add_shape(
+                type="rect",
+                x0=2*k, y0=12, x1=2*k+1.5, y1=13.5, 
+                line=dict(color="grey", width=2),
+                fillcolor="rgba(49, 206, 235, 0.59)",
+                label=dict(text=week_days[k])
+            )
+        
+    return fig
+
+# --------------------------------------
+# Start-up functions
+# --------------------------------------
 
 def load_csv_files(app):
     load_dotenv()
@@ -62,6 +131,16 @@ def load_csv_files(app):
     app.config['SONGSTATS'] = pd.read_csv(os.getenv("SONG_STATS_CSV"),index_col=0)
     app.config['CODES'] = pd.read_csv(os.getenv("CODES_CSV"),index_col=0)
 
+def get_homepage_charts(app):
+    hour_fig = get_hour_chart(app.config['SONGHISTORY'])
+    week_fig = get_weekly_chart(app.config['SONGHISTORY'])
+    world_map = get_world_map(app.config['PLACES'], app.config['CODES'])
+    return {
+        "hourly_fig": hour_fig,
+        "weekly_fig": week_fig,
+        "world_map": world_map,
+    }
+
 # --------------------------------------
 # Functions
 # --------------------------------------
@@ -69,7 +148,8 @@ def load_csv_files(app):
 def songs_ids_names(songs_df):
     song_ids = songs_df['id'].to_list()
     song_names = list(map(lambda x : x.replace(",","##"),songs_df['name'].to_list()))
-    return (song_ids,song_names)
+    return [song_ids,song_names]
+
 
 def get_quick_stats(history_df,songs_df):
     time_s = (songs_df['duration_ms'].mean()/1000)
@@ -106,7 +186,8 @@ def get_tables(art_song_df,artists_df,history_df):
     thirty_day_listens = history_30_days.groupby(by=['id','name']).size().reset_index().rename(columns={0:'No. of listens','name' : 'Song Name'}).drop(columns=['id'])
     thirty_day_listens = thirty_day_listens.sort_values(by='No. of listens',ascending=False).head(5)
 
-    return f"{top_5_artists.to_html(justify='center',index=False)}###{thirty_day_listens.to_html(justify='center',index=False)}###{all_time_listens.to_html(justify='center',index=False)}"
+    return [all_time_listens.to_html(justify='center',index=False),thirty_day_listens.to_html(justify='center',index=False),top_5_artists.to_html(justify='center',index=False)]
+
 
 def get_recs(ids : list[str],percs,song_stats_df,songdb_df):
     mean = songdb_df[MUSIC_FEATURES].mean()
@@ -115,7 +196,6 @@ def get_recs(ids : list[str],percs,song_stats_df,songdb_df):
     percs = list(map(lambda x: int(x),percs))
     relevant_stats_NORM = (song_stats_df[song_stats_df['spotify_id'].isin(ids)] - mean) / std
     averaged_song = (relevant_stats_NORM[MUSIC_FEATURES].apply(lambda x : x * percs,axis=0)).sum() / (np.sum(percs))
-    print(averaged_song)
 
     m = sklearn.neighbors.NearestNeighbors(metric='cosine')
     training_data = (songdb_df[MUSIC_FEATURES]-mean)/std
@@ -141,7 +221,6 @@ def get_hour_chart(history_df):
     )
 
     fig.update_traces(line=dict(color=LIMEGREEN, width=2.5))
-
 
     fig.update_layout(
         autosize=True,
@@ -172,22 +251,9 @@ def get_hour_chart(history_df):
             range = [-5,max_val+10]
         )
     )
-    html_str = pio.to_html(fig, include_plotlyjs='cdn', full_html=False,config=dict(displayModeBar=False))
-    return html_str
+    
+    return pio.to_html(fig, include_plotlyjs='cdn', full_html=False,config=dict(displayModeBar=False))
 
-
-def week_calc(x):
-    ## need to fix
-    if  x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=8,hour=23,minute=59,second=59):
-        return 1
-    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=15,hour=23,minute=59,second=59):
-        return 2
-    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=22,hour=23,minute=59,second=59):
-        return 3
-    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=29,hour=23,minute=59,second=59):
-        return 4
-    elif x.replace(tzinfo=None) < datetime.datetime(year=2025,month=8,day=31,hour=23,minute=59,second=59) : 
-        return 5
     
 def get_weekly_chart(history_df):
 # week-by-week, no. of songs listened to per hour
@@ -244,65 +310,7 @@ def get_weekly_chart(history_df):
         )
     )
 
-    html_str = pio.to_html(fig, include_plotlyjs='cdn', full_html=False,config=dict(displayModeBar=False))
-    return html_str
-
-def colour_picker(df,text):
-    if text == "":
-        return "rgba(80, 89, 91, 0.89)"
-    else:
-        try: 
-            watches = int(df.loc[text])
-            if watches == 1:
-                return "rgba(49, 235, 65, 0.78)"
-            return "rgba(0, 144, 13, 1)"
-        except KeyError:
-            return "rgba(240,240,240,1)"
-
-
-
-def initialise_graph_extras(fig,song_id,date,songs_df,art_song_df,artists_df):
-    week_days = ['Mo','Tu','We','Th','Fr','Sa','Su']
-    song_name = songs_df.loc[songs_df['id'] == song_id, 'name']
-    date = datetime.datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%f")
-    
-    if not song_name.empty:
-        artist_ids = art_song_df.loc[art_song_df['SongId'] == song_id, 'ArtistId']
-        artists_names = artists_df.loc[artists_df['id'].isin(artist_ids),'name'].drop_duplicates().to_list()
-        artists_str = ", ".join(artists_names)
-        total_str = f"Listening History :  {song_name.item()} by " + artists_str
-        if len(total_str) > 65:
-            total_str  = total_str[0:62] + "..."
-            
-        fig.add_shape(
-            type="rect",
-            x0=0, y0=18, x1=5, y1=19.5,
-            line=dict(width=0),
-            fillcolor="rgba(255, 255, 255, 0.59)",
-            label=dict(text=total_str, 
-                    textposition="middle left", font=dict(family="Souvenir Lt BT, bold", size=28))
-        )
-
-    
-    fig.add_shape(
-        type="rect",
-        x0=0, y0=15, x1=5, y1=16.5,
-        line=dict(width=0),
-        fillcolor="rgba(255, 255, 255, 0.59)",
-        label=dict(text=f"{date.strftime('%B').upper()} {date.strftime('%Y').upper()}", textposition="middle left", font=dict(family="Souvenir Lt BT, bold", size=28,color='red'))
-    )
-        
-    for k in range(0,7):
-        fig.add_shape(
-                type="rect",
-                x0=2*k, y0=12, x1=2*k+1.5, y1=13.5, 
-                line=dict(color="grey", width=2),
-                fillcolor="rgba(49, 206, 235, 0.59)",
-                label=dict(text=week_days[k])
-            )
-        
-    return fig
-
+    return pio.to_html(fig, include_plotlyjs='cdn', full_html=False,config=dict(displayModeBar=False))
 
 
 def proportional_dist(): ## CURRENTLY UNIMPLEMENTED
@@ -357,7 +365,4 @@ def get_world_map(places_df,codes_df):
         )
     
     return pio.to_html(fig, include_plotlyjs='cdn', full_html=False,config=dict(displayModeBar=False))
-
-
-
 

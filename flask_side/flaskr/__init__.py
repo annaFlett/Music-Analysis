@@ -69,31 +69,11 @@ def create_app(test_config=None):
 
         # id entry page
 
-    @app.route('/song', methods = ['GET','POST'])
-    def get_id():
-            if request.method == 'POST':
-                song_id = request.form.get('song_id')
-                return redirect(url_for('id_selected', song_id=song_id))
-            return render_template('home.html',title="Hello")
-
-    # @app.route('/recommendation')
-    # def id_selected():
-    #     song_id = request.args.get('song_id', None)
-    #     song_list = recommender_backend.get_recs([song_id].app.config['SONGSTATS'],app.config['SONGDB'])
-    #     return render_template('selected.html',title=f"Recs for {song_id}", song_id=song_id,rec_song_ids=song_list)
 
     @app.route('/')
     def load_analytics():
-        history_df = app.config['SONGHISTORY']
-        (song_ids,song_names) = recommender_backend.songs_ids_names(app.config['SONGS'])
-        quick_facts = recommender_backend.get_quick_stats(history_df,app.config['SONGS'])
-        hour_fig = recommender_backend.get_hour_chart(history_df)
-        week_fig = recommender_backend.get_weekly_chart(history_df)
-        world_map = recommender_backend.get_world_map(app.config['PLACES'],app.config['CODES'])
-        tables = recommender_backend.get_tables(app.config['ART_SONG'],app.config['ARTISTS'],history_df)
-        return render_template('homepage.html',hourly_fig=hour_fig,weekly_fig = week_fig,world_map = world_map,
-                               song_id='2iUmqdfGZcHIhS3b9E9EWq', facts=quick_facts,
-                               tables=tables, song_ids=song_ids,song_names=song_names)
+        charts = recommender_backend.get_homepage_charts(app)
+        return render_template('homepage.html',**charts)
     
     @app.route("/process", methods=["POST"])
     def process():
@@ -103,6 +83,18 @@ def create_app(test_config=None):
         ids = list(map(lambda x: x.replace("'","").replace(" ",""),ids))
         result = recommender_backend.get_recs(ids,percs,app.config['SONGSTATS'],app.config['SONGDB']) ## needs to take list of strings of ids
         return jsonify({"result": result})
+
+    @app.route("/table_setup", methods=['GET'])
+    def table_setup():
+        return recommender_backend.get_tables(app.config['ART_SONG'],app.config['ARTISTS'],app.config['SONGHISTORY'])
+
+    @app.route("/song_info",methods=['GET'])
+    def song_info():
+        return recommender_backend.songs_ids_names(app.config['SONGS'])
+    
+    @app.route("/get_facts",methods=['GET'])
+    def get_facts():
+        return recommender_backend.get_quick_stats(app.config['SONGHISTORY'],app.config['SONGS'])
 
     @app.route("/view")
     def view_table():
