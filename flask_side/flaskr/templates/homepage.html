@@ -18,7 +18,7 @@
             <h1 id="main-title">Your Account Analytics</h1>
         </div>
         <div id="analytics-container">
-            <div id="left-column" class="main-column flex-1">
+            <div id="left-column" class="main-column flex-2">
                 <div id="widgit-1-container" class="widgit-container">
                     <div id="widgit-1-text-container" class="widgit-text-container">
                         <h1 id="widgit-1-text" class="widgit-title">Your Listening Hours</h1>
@@ -37,14 +37,18 @@
                         {{weekly_fig|safe}}
                     </div>
                 </div>
-                <div id="widgit-5" class="widgit-container">
+                <div id="widgit-5" class="widgit-container bottom-widgit">
+                    <div id="widgit-5-text-container" class="widgit-text-container">
+                        <h1 id="widgit-5-text" class="widgit-title">Artist Origins</h1>
+                        <hr>
+                    </div>
                     <div id="world map">
                         {{world_map|safe}}
                     </div>
                 </div>
 
             </div>
-            <div id="center-column" class="main-column flex-1">
+            <div id="center-column" class="main-column flex-2">
                 <div id="widgit-4-container" class="widgit-container">
                 <div id="widgit-4-text-container" class="widgit-text-container">
                     <h1 id="widgit-4-text" class="widgit-title">Quick Stats</h1>
@@ -83,44 +87,57 @@
                 </div>
             </div>
                 <div id="widgit-3" class="widgit-container">
-                    <iframe id="dash-app" src="http://localhost:8050" style="width:100%; height:450px" ></iframe>
+                        <div id="widgit-3-text-container" class="widgit-text-container">
+                        <h1 id="widgit-3-text" class="widgit-title">Your Listening History</h1>
+                        <hr>
+                    </div>
+                      <iframe id=dash-app src="{{ url_for('load_analytics') }}dash/" frameBorder="0"></iframe>
                 </div>
 
             </div>
 
-            <div id="right-column" class="main-column flex-1">
+            <div id="right-column" class="main-column flex-3">
                 <div id="widgit-6" class="widgit-container">
                     <div id="user-select">
                         <div id="song-select">
-                            <h1 id="widgit-6-text" class="widgit-title">Pick a song to add</h1>
+                            <h1 id="widgit-6-text" class="widgit-title">Song Recommender</h1>
                             <hr>
-                            <div id="song-dropdown">                     
-                                <form>
-                                    <select name="song-select" id="song-selection-dropdown">
-                                        <option value="-1" disabled selected value>Pick a song to add</option>
-                                    </select>
-                                    <button id="add-song-button" type='button' onclick="addSong()">Add song</button> 
-                                </form>
-                            </div>
-                        </div>
+                            <div id="song-selection-container">
+                                <div id="dropdown-section">
+                                <h2>Pick a song to add:</h2>
+                                <div id="song-dropdown">                     
+                                    <form>
+                                        <select name="song-select" id="song-selection-dropdown">
+                                            <option value="-1" disabled selected value>Pick a song to add</option>
+                                        </select>
+                                        <button id="add-song-button" type='button' onclick="addSong()">Add song</button> 
+                                    </form>
+                                </div>
+                                </div>
+                            
                         <div id="songs-selected">
-                            <h1>Current songs selected: </h1>
-                            <h2 id="empty-song-msg">None! You can pick up to 5</h2>
+                            <div id="title-with-button">
+                                <h2 class="flex-5">Current songs selected: </h2>
+                                <button class="flex-1" id="song-submit-button">Song Submit</button>
+                            </div>
+                            <h3 id="empty-song-msg">None! You can pick up to 5</h3>
                             <div id="song-area">
 
                             </div>
                         </div>
+
                         <div id="slider-container">
                             <h2 id="slider-instruction-1"></h2>
-                            <h2 id="slider-instruction-2"></h2>
                             <div id="weight-slider">
                                     <div id="multiSlider"></div>
                             </div>
+                            </div>
+                             </div>
                         </div>
-                        <div id="feature-tweaking">
-                            <button id="song-submit-button">Song Submit</button>
+
+                        <!-- <div id="feature-tweaking">
                             <input type="number" name="points" step="0.1" max="1" min="0">
-                        </div>
+                        </div> -->
                     </div>
                     <div id="error-container"></div>
                     <div id="player-box">
@@ -142,11 +159,21 @@
                         </div>
                         </div>
                     </div>
+                    <div id="widgit-7" class="widgit-container bottom-widgit">
+                        <div id="no-song-placeholder">
+                            <div id="placeholder-text">
+                                <h2 id="placeholder-h">How the song recommender works:</h2>
+                                <p id="placeholder-p">Pick between 1 to 5 songs. You can then choose how much influence you want each song to have in the final result.
+                                    The algorithm then finds the 20 songs most similar to the combination of songs you put in.<p>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
 
     <script>
+
         var song_data_store = document.getElementById('song_data');
 
         let currentIdx = 0;
@@ -156,6 +183,7 @@
         const leftPlayerButton = document.getElementById("left-player-button")
         const rightPlayerButton = document.getElementById("right-player-button")
         const playerBox = document.getElementById("player-box")
+        const placeholderBox = document.getElementById("widgit-7")
         const songSubmitBtn = document.getElementById("song-submit-button")
         const player = document.getElementById("player")
 
@@ -200,6 +228,8 @@
       else {
         playerBox.style.visibility = "visible"
         playerBox.style.display = "flex"
+        // placeholderBox.style.visibility = "hidden"
+        // placeholderBox.style.display = "none"
 
 
         // if (songsAdded.length == 1) {
@@ -208,7 +238,9 @@
         // else {
         //     percs = slider.noUiSlider.get();
         // }
-
+        if (songsAdded.length == 1) {
+            percs = ['100']
+        }
         const response = await fetch('/process', {
                                     method: 'POST',
                                     headers: {
@@ -237,6 +269,7 @@
     const rightFactButton = document.getElementById("right-button-stats")
     const statDescr = document.getElementById("stat-description-text")
     const statValue = document.getElementById("stat-value-text")
+    const slider_div = document.getElementById("slider-container")
 
     function updateFact() {
         statDescr.textContent = factText[factIdx];
@@ -333,7 +366,6 @@
         if (handleCount > 1) {
             slider_create();
             document.getElementById("slider-instruction-1").textContent = "Control how much you want each song to contribute:"
-            document.getElementById("slider-instruction-2").textContent = "(By default they have equal contribution)"
             const tags = document.getElementsByClassName("contribution-value")
             const equal_perc = String(parseInt(100 / handleCount))
             for (tag of tags) {
@@ -342,7 +374,6 @@
         }
         else {
             document.getElementById("slider-instruction-1").textContent = ""
-            document.getElementById("slider-instruction-2").textContent = ""
         }
         if (handleCount > 0) {
             document.getElementById("empty-song-msg").textContent = ""

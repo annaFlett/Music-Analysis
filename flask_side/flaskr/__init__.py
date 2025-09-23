@@ -4,6 +4,15 @@ from flask import Flask, render_template, request, url_for, redirect,jsonify
 from sqlalchemy import create_engine, inspect
 from . import recommender_backend
 import pandas as pd
+from dash import Dash, dcc, html, Output, Input,ctx
+import plotly.graph_objects as go
+from dotenv import load_dotenv
+import datetime 
+
+load_dotenv()
+LGREY = "#f0efed"
+LIMEGREEN = "#32cd32"
+DGREY = "#696865"
 
 def create_app(test_config=None):
     # create and configure the app
@@ -44,6 +53,7 @@ def create_app(test_config=None):
         os.getenv("ARTISTS_COUNTRY_CSV") : 'all_songs',
     }
 
+    recommender_backend.load_csv_files(app)
     ### Uncomment when you want to read the csv's again (will need to deal with the fact that the tables exist)
     # with app.app_context():
     #     for csv_path, table_name in csv_table_mapping.items():
@@ -58,6 +68,7 @@ def create_app(test_config=None):
     #             print(f"Table '{table_name}' already exists. Skipping CSV load.")
 
         # id entry page
+
     @app.route('/song', methods = ['GET','POST'])
     def get_id():
             if request.method == 'POST':
@@ -65,21 +76,21 @@ def create_app(test_config=None):
                 return redirect(url_for('id_selected', song_id=song_id))
             return render_template('home.html',title="Hello")
 
-    @app.route('/recommendation')
-    def id_selected():
-        song_id = request.args.get('song_id', None)
-        song_list = recommender_backend.get_recs([song_id])
-        return render_template('selected.html',title=f"Recs for {song_id}", song_id=song_id,rec_song_ids=song_list)
+    # @app.route('/recommendation')
+    # def id_selected():
+    #     song_id = request.args.get('song_id', None)
+    #     song_list = recommender_backend.get_recs([song_id].app.config['SONGSTATS'],app.config['SONGDB'])
+    #     return render_template('selected.html',title=f"Recs for {song_id}", song_id=song_id,rec_song_ids=song_list)
 
     @app.route('/')
     def load_analytics():
-        (song_ids,song_names) = recommender_backend.songs_ids_names()
-        quick_facts = recommender_backend.get_quick_stats()
-        hour_fig = recommender_backend.get_hour_chart()
-        week_fig = recommender_backend.get_weekly_chart()
-        recommender_backend.get_calender()
-        world_map = recommender_backend.get_world_map()
-        tables = recommender_backend.get_tables()
+        history_df = app.config['SONGHISTORY']
+        (song_ids,song_names) = recommender_backend.songs_ids_names(app.config['SONGS'])
+        quick_facts = recommender_backend.get_quick_stats(history_df,app.config['SONGS'])
+        hour_fig = recommender_backend.get_hour_chart(history_df)
+        week_fig = recommender_backend.get_weekly_chart(history_df)
+        world_map = recommender_backend.get_world_map(app.config['PLACES'],app.config['CODES'])
+        tables = recommender_backend.get_tables(app.config['ART_SONG'],app.config['ARTISTS'],history_df)
         return render_template('homepage.html',hourly_fig=hour_fig,weekly_fig = week_fig,world_map = world_map,
                                song_id='2iUmqdfGZcHIhS3b9E9EWq', facts=quick_facts,
                                tables=tables, song_ids=song_ids,song_names=song_names)
@@ -87,13 +98,10 @@ def create_app(test_config=None):
     @app.route("/process", methods=["POST"])
     def process():
         data = request.get_json()
-        print(data)
         ids = data.get("ids", [])
         percs = data.get("splits",[])
-        print(percs)
         ids = list(map(lambda x: x.replace("'","").replace(" ",""),ids))
-        print(ids)
-        result = recommender_backend.get_recs(ids,percs) ## needs to take list of strings of ids
+        result = recommender_backend.get_recs(ids,percs,app.config['SONGSTATS'],app.config['SONGDB']) ## needs to take list of strings of ids
         return jsonify({"result": result})
 
     @app.route("/view")
@@ -110,6 +118,99 @@ def create_app(test_config=None):
         return df.to_json(orient="records")
 
 
+    dash_app = Dash(
+        __name__,
+        server=app,
+        url_base_pathname='/dash/',
+        suppress_callback_exceptions=True
+    )
+
+    songs = pd.read_csv(os.getenv("SONGS_CSV"),index_col=0)
+    history = pd.read_csv(os.getenv("SONGHISTORY_CSV"),index_col=0)
+    history['played_at'] = pd.to_datetime(history['played_at'])
+    history['played_at'] = history['played_at'].apply(lambda x : recommender_backend.account_for_germany(x))
+
+    song_choices = list(zip(songs['name'],songs['id']))
+
+
+    dash_app.layout = html.Div([
+        dcc.Dropdown(
+            id='song_choice',
+            options=[{'label': song_name, 'value': song_id} for song_name,song_id in song_choices],
+            searchable=True,
+            style={'width': '100%'}
+        ),
+        html.Button('<',id='back',n_clicks=0),
+        html.Button('>',id='forwards',n_clicks=0),
+        dcc.Graph(id='graph',config= {'displayModeBar' : False},style={'width': '100%'},responsive=True),
+        dcc.Store(id="current_date", data=datetime.datetime.today().replace(day=1))
+    ],style={"margin": "0", "padding": "0"})
+
+    @dash_app.callback(
+        Output('graph', 'figure'),
+        Input('song_choice', 'value'),
+        Input('current_date','data'),
+    )
+    def update_graph(song,date):
+        fig = go.Figure()
+        fig.update_xaxes(range = [-1,15],showticklabels=False,showgrid=False,zeroline=False,fixedrange=True)
+        fig.update_yaxes(range = [-1,20],showticklabels=False,showgrid=False,zeroline = False,fixedrange=True)
+        fig.update_layout(template='plotly_white',
+                          margin=dict(l=0, r=0, t=0, b=0), 
+                          paper_bgcolor=DGREY,  
+                          plot_bgcolor=DGREY,)
+
+        fig.layout.shapes = []
+        song_history = history[history['id'] == song][['name','played_at']]
+        song_history['month'] = song_history['played_at'].apply(lambda x : x.month)
+
+        cal_date = datetime.datetime.strptime(date,"%Y-%m-%dT%H:%M:%S.%f")
+
+        filt_history = song_history[song_history['month'] == cal_date.month]
+        filt_history['day'] = filt_history['played_at'].apply(lambda x : x.day)
+        counts = filt_history.groupby(by='day').size()
+
+        day_labels = recommender_backend.compute_day_labels(cal_date)
+        
+        for i in range(0,5):
+            for j in range(0,7):
+                text = ""
+                if day_labels[i][j] != 0:
+                    text = day_labels[i][j]
+                    
+                fig.add_shape(
+                    type="rect",
+                    x0=2*j, y0=10 - 2*i, x1=2*j+1.5, y1=10 -2*i+1.5, 
+                    line=dict(color="black", width=1),
+                    fillcolor=recommender_backend.colour_picker(counts,text),
+                    label=dict(text=text)
+                )
+                
+        fig = recommender_backend.initialise_graph_extras(fig,song,date,app.config['SONGS'],app.config['ART_SONG'],app.config['ARTISTS'])
+            
+        return fig
+
+    @dash_app.callback(
+        Output('current_date','data'),
+        Input('back','n_clicks'),
+        Input('forwards','n_clicks'),
+        Input('current_date','data'),
+        prevent_initial_call=True
+    )
+    def update_month(back,forwards,current_date):
+        current_date = datetime.datetime.strptime(current_date,"%Y-%m-%dT%H:%M:%S.%f")
+        if "back" == ctx.triggered_id:
+            current_date = (current_date - datetime.timedelta(days=1)).replace(day=1)
+        elif "forwards" == ctx.triggered_id:
+            current_date = (current_date + datetime.timedelta(days=35)).replace(day=1)
+        return current_date
+        
+
+    if __name__ == "__main__":
+        dash_app.run(debug=True)
+
+    
+    
     return app
 
 

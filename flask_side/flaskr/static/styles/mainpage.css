@@ -4,7 +4,8 @@
     font-size: 80px;
     font-weight: bold;
     text-align:center;
-    margin-bottom:10px;
+    margin-top : 20px;
+    margin-bottom : 0px;
 }
 
 
@@ -14,10 +15,12 @@ h1 {
 }
 h2 {
     color:white;
+    margin : 4px;
 }
 
 h3 {
   color:white;
+  margin:4px;
 }
 
 th {
@@ -37,9 +40,14 @@ table {
 
 .widgit-container {
   background-color: #696865;
-  margin:20px;
+  margin:10px;
   padding-top:0px;
   padding-bottom:0px;
+}
+
+.bottom-widgit {
+  margin-bottom: 0px;
+  padding-bottom : 0px
 }
 
 hr {
@@ -51,23 +59,26 @@ hr {
     width: auto;
     min-height: 200px;
     padding: 20px;
+    padding-top : 0px;
+    padding-bottom : 0px;
 }
 
 #analytics-container > div {
     display: flex;
     flex-direction: column;
-    flex: 1 1 0;
     min-height: 200px;
-    padding: 20px;
+    padding: 5px;
+    padding-bottom : 0px;
 }
 
 #numeric-stats {
     display: flex;
     padding: 20px;
-    border-color: limegreen;
+    /* border-color: limegreen;
     border-width: 5px;
-    border-style: solid;
+    border-style: solid; */
     min-height:160px;
+    background-color: #A1A1A1;
 }
 
 .main-column > div {
@@ -80,8 +91,22 @@ hr {
     flex : 1;
 }
 
+.flex-2 {
+  flex : 2;
+}
+
 .flex-3 {
     flex : 3;
+}
+
+.flex-5 {
+  flex : 5
+}
+
+#empty-song-msg {
+  margin-top : 5px;
+  margin-bottom : 5px;
+  margin-left : 25px
 }
 
 #stat-description {
@@ -103,6 +128,9 @@ hr {
     align-items: center;
 }
 
+#widgit-6 {
+  padding-bottom : 20px
+}
 #table-holder {
   width : 100%
 }
@@ -125,6 +153,33 @@ hr {
   margin : 4px;
 }
 
+#widgit-1 {
+  max-height: 300px;
+  padding-top : 10px;
+  padding-bottom : 10px;
+}
+
+#widgit-2 {
+  max-height : 300px;
+  padding-top : 10px;
+  padding-bottom : 10px;
+}
+
+
+#widgit-5 {
+  padding-top : 10px;
+  padding-bottom : 10px;
+}
+
+#widgit-7 {
+  height : 70%;
+  display: flex;
+  justify-content: center;
+  align-items:center;
+  padding : 20px;
+  position: relative;
+}
+
 #widgit-2-text {
   margin : 4px;
 }
@@ -133,7 +188,36 @@ hr {
   margin : 4px;
 }
 
+#dash-app {
+  width: 100%;
+  height: 550px;
+  frameBorder: 0;
+}
+
+#no-song-placeholder {
+  padding : 20px;
+  background-color: #A1A1A1;
+  position : absolute;
+  inset: 20px;
+  display: flex;              
+  justify-content: center;     
+  align-items: center;
+} 
+
+#placeholder-text {
+  text-align: center;
+  width : 80%
+}
+
+#placeholder-h {
+  color : darkgreen;
+}
+
+#placeholder-p {
+  color: white;
+}
 /* Recommendations player */
+
 .arrow {
   border: solid black;
   border-width: 0 3px 3px 0;
@@ -173,7 +257,7 @@ hr {
 
 #content-box {
   border-color: black;
-  background-color: deepskyblue;
+  background-color: limegreen;
   border-width: 2px 2px 2px 2px;
   border-style: solid;
   padding: 20px;
@@ -208,9 +292,42 @@ hr {
 }
 
 
-#Recommendations {
-  background-color: #696865;
+#song-selection-container {
+  background-color: #A1A1A1;
+  padding: 20px;
+  /*
+    border-color: limegreen;
+    border-width: 5px;
+    border-style: solid; */
 }
+
+#song-choice {
+  margin-left : 0px;
+  margin-right: 0px;
+  margin-bottom : 10px;
+}
+
+#slider-instruction-1 {
+  margin-bottom : 10px;
+}
+
+#songs-selected {
+  padding-top : 20px;
+  padding-bottom : 20px;
+  border-bottom-style : dashed;
+  border-bottom-color: darkgreen;
+  border-bottom-width : 3px;
+}
+
+#title-with-button {
+  display: flex;
+  margin-right : 32px;
+}
+
+#slider-container {
+  padding-top : 20px;
+}
+
 #top-text {
   text-align: center;
 }
@@ -231,9 +348,11 @@ hr {
   color : red;
 }
 
-#songs-selected {
-  padding : 20px;
-  background-color: #696865 ;
+#dropdown-section {
+  border-bottom-style : dashed;
+  border-bottom-color: darkgreen;
+  border-bottom-width : 3px;
+  padding-bottom : 20px;
 }
 
 /* ------------------------- */
