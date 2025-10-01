@@ -1,7 +1,7 @@
  //==========================================
 // Page startup
 //==========================================
-const tableArea = document.getElementById("table-holder")
+const tableArea = document.getElementById("table-container")
 
 let tables_arr;
 let song_ids;
@@ -149,6 +149,8 @@ const addSongBtn = document.getElementById("add-song-button")
 const songsDropdown = document.getElementById("song-selection-dropdown")
 const tagArea = document.getElementById("song-area")
 
+addSongBtn.addEventListener("click", () => addSong())
+
 function deleteTag(id) {
     const tagDiv = document.getElementById(id+"-div")
     tagDiv.remove()
@@ -162,6 +164,10 @@ function deleteTag(id) {
     handleCount -= 1
     update_slider()
 
+    if (handleCount == 0) {
+        songSubmitBtn.disabled = true
+    }
+
 }
 
 
@@ -169,7 +175,7 @@ function addSong(ev) {
     const song_id = songsDropdown.value
     const song_name = songsDropdown.options[songsDropdown.selectedIndex].text
 
-    if (!songsAdded.includes(song_id)) {
+    if (!songsAdded.includes(song_id) && song_id != "DEFAULT") {
 
         const newNode = document.createElement("div")
         newNode.setAttribute("class","song-tag")
@@ -195,8 +201,14 @@ function addSong(ev) {
         update_slider()
     }
 
+    console.log(handleCount)
+
     if (handleCount > 4) {
         addSongBtn.disabled = true
+    }
+
+    if (handleCount > 0) {
+        songSubmitBtn.disabled = false
     }
 }
 
@@ -210,7 +222,7 @@ const sliderInstruction = document.getElementById("slider-instruction-1")
 const slider_div = document.getElementById("slider-container")
 const sliderInstructionText = "Control how much you want each song to contribute:"
 const emptyMsgText = "None! You can pick up to 5 songs"
-const colours = ['red','green','blue','orange','pink'];
+const colours = ["#E00000",'darkgreen','blue','#ffa915ff','pink'];
 
 let handleCount = 0
 let percs;
@@ -228,7 +240,8 @@ function slider_create() {
         connect: Array(handleCount).fill(true), 
         range: {min: 0, max: 100},
         step:1,
-        margin:10
+        margin:10,
+        padding : [10,10],
     });
 
     segmentColours()
@@ -265,9 +278,11 @@ function update_slider() {
         slider_create();
         sliderInstruction.textContent = sliderInstructionText
         const equal_perc = String(parseInt(100 / handleCount))
-        for (const tag of tags) {
-            tag.textContent = "(" + equal_perc + "%)"
-        }
+
+        Array.from(tags).forEach((tag,index) => {
+            tag.textContent = "(" + equal_perc + "%)";
+            tag.style.color = colours[index];
+        });
     }
     else {
         sliderInstruction.textContent = ""
@@ -302,8 +317,8 @@ const rightFactButton = document.getElementById("right-button-stats")
 const statDescr = document.getElementById("stat-description-text")
 const statValue = document.getElementById("stat-value-text")
 const tableDropdown = document.getElementById("dropdown-menu")
-const factText = ["Average liked song length ", "No. of songs listened to in the past week",
-                    "No. of songs listened to in the past 30 days", "Average number of songs listened to per day"];
+const factText = ["Average liked <br>song length ", "Songs in the <br>past week",
+                    "Songs in the <br>past 30 days", "Average songs <br>per day"];
 
 let factIdx = 0;
 let factAnswers;
@@ -324,6 +339,6 @@ tableDropdown.addEventListener('change',() => {
 });
 
 function updateFact() {
-    statDescr.textContent = factText[factIdx];
+    statDescr.innerHTML = factText[factIdx];
     statValue.textContent = factAnswers[factIdx];
 }
