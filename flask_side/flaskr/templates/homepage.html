@@ -14,6 +14,12 @@
       href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css"
       rel="stylesheet"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
   </head>
   <body>
@@ -36,7 +42,7 @@
           <div id="widgit-2-container" class="widgit-container">
             <div id="widgit-2-text-container" class="widgit-text-container">
               <h1 id="widgit-2-text" class="widgit-title">
-                Your Weekly Trends
+                Your Weekly Listening Hours
               </h1>
               <hr />
             </div>
@@ -44,7 +50,9 @@
           </div>
           <div id="widgit-5" class="widgit-container bottom-widgit">
             <div id="widgit-5-text-container" class="widgit-text-container">
-              <h1 id="widgit-5-text" class="widgit-title">Artist Origins</h1>
+              <h1 id="widgit-5-text" class="widgit-title">
+                Your Liked Artists' Origins
+              </h1>
               <hr />
             </div>
             <div id="world map">{{world_map|safe}}</div>
@@ -60,7 +68,7 @@
               <div id="left-button-stats" class="flex-1 left-button-container">
                 <button class="button"><i class="arrow left"></i></button>
               </div>
-              <div id="stat-description" class="flex-3">
+              <div id="stat-description" class="flex-5">
                 <h1 id="stat-description-text"></h1>
               </div>
               <div id="stat-value" class="flex-3">
@@ -75,17 +83,19 @@
             </div>
             <div id="top-5s">
               <div id="top-5s-text">
-                <h2>See your top 5 most popular in a given category:</h2>
+                <h2 id="top-5s-text-msg">
+                  See your top 5 most popular in a given category:
+                </h2>
               </div>
               <div id="top-5s-dropdown">
                 <select name="dropdown-ans" id="dropdown-menu">
                   <option value="0">Song listens (all time)</option>
                   <option value="1">Song listens (past 30 days)</option>
                   <option value="2">Artist Appearances</option>
-                  <!-- <option value="audi">Audi</option> turn this into albums-->
+                  <option value="3">Albums</option>
                 </select>
               </div>
-              <div id="table-holder" class="flex-3"></div>
+              <div id="table-container" class="flex-3"></div>
             </div>
           </div>
           <div id="widgit-3" class="widgit-container">
@@ -113,18 +123,18 @@
                 <hr />
                 <div id="song-selection-container">
                   <div id="dropdown-section">
-                    <h2>Pick a song to add:</h2>
+                    <h2>Add songs here:</h2>
                     <div id="song-dropdown">
                       <form>
                         <select name="song-select" id="song-selection-dropdown">
-                          <option value="-1" disabled selected value>
+                          <option value="DEFAULT" disabled selected value>
                             Pick a song to add
                           </option>
                         </select>
                         <button
                           id="add-song-button"
                           type="button"
-                          onclick="addSong()"
+                          class="recommender-button"
                         >
                           Add song
                         </button>
@@ -135,7 +145,11 @@
                   <div id="songs-selected">
                     <div id="title-with-button">
                       <h2 class="flex-5">Current songs selected:</h2>
-                      <button class="flex-1" id="song-submit-button">
+                      <button
+                        disabled="true"
+                        class="flex-1 recommender-button"
+                        id="song-submit-button"
+                      >
                         Song Submit
                       </button>
                     </div>
@@ -154,7 +168,7 @@
 
               <!-- <div id="feature-tweaking">
                             <input type="number" name="points" step="0.1" max="1" min="0">
-                        </div> -->
+                   </div> -->
             </div>
             <div id="error-container"></div>
             <div id="player-box">
@@ -173,7 +187,7 @@
                     <i class="arrow left"></i>
                   </button>
                 </div>
-                <div id="embedding-container">
+                <div id="embedding-container" class="flex-6">
                   <iframe
                     id="player"
                     data-testid="embed-iframe"
@@ -201,10 +215,9 @@
               <div id="placeholder-text">
                 <h2 id="placeholder-h">How the song recommender works:</h2>
                 <p id="placeholder-p">
-                  Pick between 1 to 5 songs. You can then choose how much
-                  influence you want each song to have in the final result. The
-                  algorithm then finds the 20 songs most similar to the
-                  combination of songs you put in.
+                  Pick between 1 to 5 songs and you will be recommended songs
+                  similar to the ones selected. Additionally, you can choose how
+                  much influence you want each song to have in the final result.
                 </p>
               </div>
             </div>
