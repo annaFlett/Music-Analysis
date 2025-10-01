@@ -1,16 +1,4 @@
 TODO:
-Add top 5 albums to the dropdown
-Make it so that the calendar cannot go back past August or beyond where we are now
-Sort out formatting for the table
-Sort out fomrmatting for the calendar
-Descriptions for graphs
-Stop quick fact box changing size
-Make slides unable to go past 10/90 for extreme handles
-Try and sort out colouring on map so that count=1 countries look like they have been coloured in
-Button formatting(esp add song / that dropdown -> make bigger) / General stylistic formatting
-Fix the week splitting (make past 4 weeks from current point + change legend)
-If can be bothered, make it so that you can change the range of the listening hours graph
-better formatting on no songs selected / put in red error thing if they press button without selecting a song (or disable button might be better)
 
 
 Taking things further:
@@ -19,9 +7,4 @@ try and get more songs for the songDB to make recommendations from
 add warnings when songs are selected which cannot be used in the recommender (cause they have no data) -> make sure if only one song
 is picked and its missing data, that it doesn't break scikit
 add auth so other people can use the site
-
-
-Look into this with the csv files:
--> 2 in a row duplicates (maybe shows up once has been over the duration of the song?). Work out why this happens / how to remove the duplicates
--> Each morning seems to start with a song which was last o yeasterday (again, maybe has been longer than the duration of the song, so shows up). Check if this happens every day, 
-and if it does delete first entry from every morning. -> doesn't happen everyday, seems to just be random
+Try and make the site work using databases rather than CSVs
